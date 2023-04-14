@@ -16,14 +16,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import ru.smak.location_214.ui.theme.Location214Theme
 
 class MainActivity : ComponentActivity() {
-    private val launcher2 = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ){}
-    private val launcher1 = registerForActivityResult(
+
+    private val launcher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ){
-        launcher2.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+        parseResults(it)
     }
+
+    private fun parseResults(results: Map<String, Boolean>) {
+        var mainGranted = true
+        results.forEach { k, v ->
+            if (k == Manifest.permission.ACCESS_COARSE_LOCATION
+                || k == Manifest.permission.ACCESS_FINE_LOCATION)
+                mainGranted = mainGranted and v
+            else mainGranted = false
+        }
+        if (mainGranted)
+            launcher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -37,24 +48,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        launcher1.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-            )
-        )
+        if (requestMissingPermissions(arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        ))){
+            requestMissingPermissions(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+        }
     }
 
-    fun requestMissingPermissions(
-        permissions: Array<String>,
-        results: (Map<String, Boolean>)->Unit
-    ){
-        if (
-            permissions.fold(false){ all,p ->
+    fun requestMissingPermissions(permissions: Array<String>): Boolean {
+        if (permissions.fold(false){ all,p ->
                 all || checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED
-            }
-        ){
+        }){
+            launcher.launch(permissions)
+            return false
         }
+        return true
     }
 }
 
