@@ -13,7 +13,9 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 
-class LocationHelper : LocationListener{
+class LocationHelper(
+    private val locationUpdater: (Location)->Unit
+) : LocationListener{
     var flp: FusedLocationProviderClient? = null
 
     @SuppressLint("MissingPermission")
@@ -48,6 +50,6 @@ class LocationHelper : LocationListener{
     }
 
     override fun onLocationChanged(p0: Location) {
-        TODO("Not yet implemented")
+        locationUpdater(p0)
     }
 }
