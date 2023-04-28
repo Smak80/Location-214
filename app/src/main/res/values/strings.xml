@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Location-214</string>
+    <string name="location">Latitude: %f\nLongitude: %f</string>
 </resources>
